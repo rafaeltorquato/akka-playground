@@ -9,7 +9,8 @@ public class Main {
                 FirstSimpleBehavior.create(),
                 "FirstActorSystem"
         );
-        actorSystem.tell("Hello Actor!");
+        actorSystem.tell("say hello");
+        actorSystem.tell("who are you");
         actorSystem.tell("Second message!");
     }
 }
