@@ -63,7 +63,12 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
                     WorkerBehavior.create(),
                     "worker-" + i
             );
-            worker.tell(new WorkerBehavior.Command("start", getContext().getSelf()));
+            final WorkerBehavior.Command command = new WorkerBehavior.Command(
+                    "start",
+                    getContext().getSelf()
+            );
+            worker.tell(command);
+            worker.tell(command);
         }
     }
 }

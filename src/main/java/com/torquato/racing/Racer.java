@@ -31,8 +31,6 @@ public class Racer extends AbstractBehavior<Racer.Command> {
     private Random random;
 
     private double currentSpeed = 0;
-    private double currentPosition = 0;
-    private int raceLength;
 
     public Racer(ActorContext<Command> context) {
         super(context);
@@ -47,7 +45,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
         return currentSpeed * 1000 / 3600;
     }
 
-    private void determineNextSpeed() {
+    private void determineNextSpeed(int raceLength, double currentPosition) {
         if (currentPosition < ((double) raceLength / 4)) {
             currentSpeed = currentSpeed + (((getMaxSpeed() - currentSpeed) / 10) * random.nextDouble());
         } else {
@@ -67,24 +65,45 @@ public class Racer extends AbstractBehavior<Racer.Command> {
 
     @Override
     public Receive<Command> createReceive() {
+        return notYetStarted();
+    }
+
+    public Receive<Command> notYetStarted() {
         return newReceiveBuilder()
                 .onMessage(StartCommand.class, (command) -> {
-                    this.raceLength = command.raceLength;
                     this.random = new Random();
                     this.averageSpeedAdjustmentFactor = random.nextInt(30) - 10;
-                    return Behaviors.same();
+                    return running(command.raceLength, 0);
                 })
+                .build();
+    }
+
+    public Receive<Command> running(final int raceLength, final double currentPosition) {
+        return newReceiveBuilder()
                 .onMessage(PositionCommand.class, (command) -> {
-                    determineNextSpeed();
-                    currentPosition += getDistanceMovedPerSecond();
-                    if (currentPosition > raceLength) {
-                        currentPosition = raceLength;
+                    determineNextSpeed(raceLength, currentPosition);
+                    double newPosition = currentPosition + getDistanceMovedPerSecond();
+                    boolean completed = newPosition >= raceLength;
+                    if (completed) {
+                        newPosition = raceLength;
                     }
                     command.controller.tell(new RaceController.RacerUpdateCommand(
                             getContext().getSelf(),
-                            this.currentPosition
+                            newPosition
                     ));
-                    return Behaviors.same();
+                    return completed ? completed(newPosition) : running(raceLength, newPosition);
+                })
+                .build();
+    }
+
+    public Receive<Command> completed(final double currentPosition) {
+        return newReceiveBuilder()
+                .onMessage(PositionCommand.class, (command) -> {
+                    command.controller.tell(new RaceController.RacerUpdateCommand(
+                            getContext().getSelf(),
+                            currentPosition
+                    ));
+                    return Behaviors.stopped();
                 })
                 .build();
     }

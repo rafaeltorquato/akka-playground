@@ -23,18 +23,36 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
         return Behaviors.setup(WorkerBehavior::new);
     }
 
+
     private WorkerBehavior(ActorContext<WorkerBehavior.Command> context) {
         super(context);
     }
 
     @Override
     public Receive<WorkerBehavior.Command> createReceive() {
+        return uncachedReceive();
+    }
+
+    private Receive<Command> uncachedReceive() {
         return newReceiveBuilder()
-                .onMessage(WorkerBehavior.Command.class, (command) -> {
+                .onMessage(Command.class, (command) -> {
+                    BigInteger probablePrime = null;
                     if ("start".equals(command.message)) {
                         final BigInteger number = new BigInteger(2000, new Random());
-                        final BigInteger probablePrime = number.nextProbablePrime();
+                        probablePrime = number.nextProbablePrime();
                         command.sender.tell(new ManagerBehavior.ResultCommand(probablePrime));
+                    }
+                    return cachedReceive(probablePrime);
+                })
+                .build();
+    }
+
+    private Receive<Command> cachedReceive(BigInteger generatedPrime) {
+        return newReceiveBuilder()
+                .onMessage(Command.class, (command) -> {
+                    if ("start".equals(command.message)) {
+                        log.info("Cache HIT!");
+                        command.sender.tell(new ManagerBehavior.ResultCommand(generatedPrime));
                     }
                     return Behaviors.same();
                 })
