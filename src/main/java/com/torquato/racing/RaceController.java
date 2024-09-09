@@ -37,7 +37,7 @@ public class RaceController extends AbstractBehavior<RaceController.Command> {
 
     private Map<ActorRef<Racer.Command>, Double> positions;
     private long start;
-    private int raceLength = 100;
+    private final int raceLength = 100;
 
     private RaceController(ActorContext<Command> context) {
         super(context);
@@ -60,33 +60,34 @@ public class RaceController extends AbstractBehavior<RaceController.Command> {
                                 new GetPostionsCommand(),
                                 Duration.ofSeconds(1)
                         );
-                        return this;
+                        return Behaviors.same();
                     });
                 })
                 .onMessage(RacerUpdateCommand.class, command -> {
                     this.positions.put(command.racer, command.position);
-                    return this;
+                    return Behaviors.same();
                 })
                 .onMessage(GetPostionsCommand.class, command -> {
                     for (ActorRef<Racer.Command> racer : this.positions.keySet()) {
                         racer.tell(new Racer.PositionCommand(getContext().getSelf()));
                     }
                     displayRace();
-                    return this;
+                    return Behaviors.same();
                 })
                 .build();
     }
 
     private void displayRace() {
-        int displayLength = 160;
+        int displayLength = 100;
         for (int i = 0; i < 50; ++i) System.out.println();
         System.out.println("Race has been running for " + ((System.currentTimeMillis() - this.start) / 1000) + " seconds.");
         System.out.println("    " + new String(new char[displayLength]).replace('\0', '='));
-        positions.forEach((k, v) -> {
-            String path = k.path().toString();
-            path = path.replaceAll("akka://RaceController/user/", "");
-            System.out.println(path + " : " + new String(new char[(int) (v * displayLength / 100)]).replace('\0', '*'));
-        });
+        int i = 0;
+        for(ActorRef<Racer.Command> racer : this.positions.keySet()) {
+            Double v = this.positions.get(racer);
+            System.out.println(i + " : " + new String(new char[(int) (v * displayLength / 100)]).replace('\0', '*'));
+            i++;
+        }
     }
 
 

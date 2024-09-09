@@ -36,7 +36,7 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                         final BigInteger probablePrime = number.nextProbablePrime();
                         command.sender.tell(new ManagerBehavior.ResultCommand(probablePrime));
                     }
-                    return this;
+                    return Behaviors.same();
                 })
                 .build();
     }

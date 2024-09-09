@@ -44,7 +44,7 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
                     if ("start".equals(command.instruction)) {
                         executeStart();
                     }
-                    return this;
+                    return Behaviors.same();
                 })
                 .onMessage(ResultCommand.class, (command) -> {
                     sortedSet.add(command.number);
@@ -52,7 +52,7 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
                     if (sortedSet.size() == MAX_PRIMES) {
                         log.info("All primes: {}", sortedSet);
                     }
-                    return this;
+                    return Behaviors.same();
                 })
                 .build();
     }

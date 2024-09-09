@@ -27,7 +27,6 @@ public class Racer extends AbstractBehavior<Racer.Command> {
 
     //Instance
 
-    private final double defaultAverageSpeed = 48.2;
     private int averageSpeedAdjustmentFactor;
     private Random random;
 
@@ -40,6 +39,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
     }
 
     private double getMaxSpeed() {
+        double defaultAverageSpeed = 48.2;
         return defaultAverageSpeed * (1 + ((double) averageSpeedAdjustmentFactor / 100));
     }
 
@@ -48,7 +48,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
     }
 
     private void determineNextSpeed() {
-        if (currentPosition < (raceLength / 4)) {
+        if (currentPosition < ((double) raceLength / 4)) {
             currentSpeed = currentSpeed + (((getMaxSpeed() - currentSpeed) / 10) * random.nextDouble());
         } else {
             currentSpeed = currentSpeed * (0.5 + random.nextDouble());
@@ -60,7 +60,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
         if (currentSpeed < 5)
             currentSpeed = 5;
 
-        if (currentPosition > (raceLength / 2) && currentSpeed < getMaxSpeed() / 2) {
+        if (currentPosition > ((double) raceLength / 2) && currentSpeed < getMaxSpeed() / 2) {
             currentSpeed = getMaxSpeed() / 2;
         }
     }
@@ -72,7 +72,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
                     this.raceLength = command.raceLength;
                     this.random = new Random();
                     this.averageSpeedAdjustmentFactor = random.nextInt(30) - 10;
-                    return this;
+                    return Behaviors.same();
                 })
                 .onMessage(PositionCommand.class, (command) -> {
                     determineNextSpeed();
@@ -84,7 +84,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
                             getContext().getSelf(),
                             this.currentPosition
                     ));
-                    return this;
+                    return Behaviors.same();
                 })
                 .build();
     }
