@@ -2,14 +2,17 @@ package com.torquato.racing;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
+import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.Random;
 
+@Slf4j
 public class Racer extends AbstractBehavior<Racer.Command> {
 
     public interface Command extends Serializable {
@@ -68,7 +71,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
         return notYetStarted();
     }
 
-    public Receive<Command> notYetStarted() {
+    private Receive<Command> notYetStarted() {
         return newReceiveBuilder()
                 .onMessage(StartCommand.class, (command) -> {
                     this.random = new Random();
@@ -78,7 +81,7 @@ public class Racer extends AbstractBehavior<Racer.Command> {
                 .build();
     }
 
-    public Receive<Command> running(final int raceLength, final double currentPosition) {
+    private Receive<Command> running(final int raceLength, final double currentPosition) {
         return newReceiveBuilder()
                 .onMessage(PositionCommand.class, (command) -> {
                     determineNextSpeed(raceLength, currentPosition);
@@ -91,21 +94,36 @@ public class Racer extends AbstractBehavior<Racer.Command> {
                             getContext().getSelf(),
                             newPosition
                     ));
-                    return completed ? completed(newPosition) : running(raceLength, newPosition);
+                    return completed ? completed(newPosition, System.currentTimeMillis()) : running(raceLength, newPosition);
                 })
                 .build();
     }
 
-    public Receive<Command> completed(final double currentPosition) {
+    private Receive<Command> completed(final double currentPosition, final long timestamp) {
         return newReceiveBuilder()
                 .onMessage(PositionCommand.class, (command) -> {
                     command.controller.tell(new RaceController.RacerUpdateCommand(
                             getContext().getSelf(),
                             currentPosition
                     ));
-                    return Behaviors.stopped();
+                    command.controller.tell(new RaceController.RacerFinishedCommand(
+                            getContext().getSelf(),
+                            timestamp
+                    ));
+                    return waitingToStop();
                 })
                 .build();
     }
+
+    private Receive<Command> waitingToStop() {
+        return newReceiveBuilder()
+                .onAnyMessage(command -> Behaviors.same())
+                .onSignal(PostStop.class, signal -> {
+                    log.info("I'm about to terminate. Signal: {}", signal);
+                    return Behaviors.same();
+                })
+                .build();
+    }
+
 
 }
