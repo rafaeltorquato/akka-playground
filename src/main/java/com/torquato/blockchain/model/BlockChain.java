@@ -1,12 +1,15 @@
 package com.torquato.blockchain.model;
 
 import com.torquato.blockchain.utils.BlockChainUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
+import java.util.Optional;
 
+@Slf4j
 public class BlockChain {
 
-	private LinkedList<Block> blocks;
+	private final LinkedList<Block> blocks;
 	
 	public BlockChain() {
 		blocks = new LinkedList<>();
@@ -32,20 +35,20 @@ public class BlockChain {
 	
 	public void printAndValidate() {
 		String lastHash = "0";
-		for (Block block : blocks) {
+		for (Block block : this.blocks) {
 			System.out.println("Block " + block.getTransaction().getId() + " ");
 			System.out.println(block.getTransaction());
 			
 			if (block.getPreviousHash().equals(lastHash)) {
-				System.out.print("Last hash matches ");
+				log.info("Last hash matches ");
 			} else {
-				System.out.print("Last hash doesn't match ");
+				log.info("Last hash doesn't match ");
 			}
 			
 			if (BlockChainUtils.validateBlock(block)) {
-				System.out.println("and hash is valid");
+				log.info("and hash is valid");
 			} else {
-				System.out.println("and hash is invalid");
+				log.info("and hash is invalid");
 			}
 			
 			lastHash = block.getHash();
@@ -54,7 +57,7 @@ public class BlockChain {
 	}
 
 	public String getLastHash() {
-		if (blocks.size() > 0)
+		if (!blocks.isEmpty())
 			return blocks.getLast().getHash();
 		return null;
 	}
