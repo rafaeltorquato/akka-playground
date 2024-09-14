@@ -1,7 +1,6 @@
 package com.torquato.blockchain.utils;
 
 import com.torquato.blockchain.model.Block;
-import com.torquato.blockchain.model.HashResult;
 import lombok.SneakyThrows;
 
 import java.nio.charset.StandardCharsets;
@@ -20,32 +19,6 @@ public class BlockChainUtils {
             hexString.append(hex);
         }
         return hexString.toString();
-    }
-
-
-    public static HashResult mineBlock(final Block block,
-                                       final int difficultyLevel,
-                                       final int startNonce,
-                                       final int endNonce) {
-        String hash = new String(new char[difficultyLevel]).replace("\0", "X");
-        final String target = new String(new char[difficultyLevel]).replace("\0", "0");
-
-        int nonce = startNonce;
-        while (!hash.substring(0, difficultyLevel).equals(target) && nonce < endNonce) {
-            nonce++;
-            final String dataToEncode = block.getPreviousHash()
-                    + block.getTransaction().getTimestamp()
-                    + nonce
-                    + block.getTransaction();
-            hash = calculateHash(dataToEncode);
-        }
-        if (hash.substring(0, difficultyLevel).equals(target)) {
-            HashResult hashResult = new HashResult();
-            hashResult.foundAHash(hash, nonce);
-            return hashResult;
-        } else {
-            return null;
-        }
     }
 
     public static boolean validateBlock(final Block block) {

@@ -33,7 +33,8 @@ public class RaceController extends AbstractBehavior<RaceController.Command> {
     private record GetPostionsCommand() implements Command {
     }
 
-    public record RacerFinishedCommand(ActorRef<Racer.Command> racer, Long timestamp) implements Command {
+    public record RacerFinishedCommand(ActorRef<Racer.Command> racer,
+                                       Long timestamp) implements Command {
     }
 
     public static Behavior<Command> create() {
