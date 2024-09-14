@@ -1,5 +1,6 @@
 package com.torquato.blockchain;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -20,7 +21,8 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
 
     public record BlockMiningCommand(Block block,
                                      int startNonce,
-                                     int difficultyLevel) implements Command {
+                                     int difficultyLevel,
+                                     ActorRef<HashResult> targetActor) implements Command {
     }
 
     public static Behavior<Command> create() {
@@ -51,7 +53,7 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                     if (hash.substring(0, command.difficultyLevel).equals(target)) {
                         HashResult hashResult = new HashResult();
                         hashResult.foundAHash(hash, nonce);
-                        // TODO Send hash result
+                        command.targetActor.tell(hashResult);
                     }
                     return Behaviors.same();
                 })

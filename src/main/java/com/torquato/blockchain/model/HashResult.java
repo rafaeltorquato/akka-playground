@@ -1,5 +1,10 @@
 package com.torquato.blockchain.model;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode(of = {"nonce", "hash"})
 public class HashResult {
 
     private int nonce;
@@ -21,7 +26,7 @@ public class HashResult {
         return complete;
     }
 
-    public synchronized void foundAHash(String hash, int nonce) {
+    public void foundAHash(String hash, int nonce) {
         this.hash = hash;
         this.nonce = nonce;
         this.complete = true;
