@@ -23,6 +23,7 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
         return Behaviors.setup(WorkerBehavior::new);
     }
 
+    private Random random = new Random();
 
     private WorkerBehavior(ActorContext<WorkerBehavior.Command> context) {
         super(context);
@@ -40,7 +41,10 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                     if ("start".equals(command.message)) {
                         final BigInteger number = new BigInteger(2000, new Random());
                         probablePrime = number.nextProbablePrime();
-                        command.sender.tell(new ManagerBehavior.ResultCommand(probablePrime));
+                        if (this.random.nextInt(5) < 2) {
+                            command.sender.tell(new ManagerBehavior.ResultCommand(probablePrime));
+                        }
+
                     }
                     return cachedReceive(probablePrime);
                 })
@@ -52,7 +56,10 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                 .onMessage(Command.class, (command) -> {
                     if ("start".equals(command.message)) {
                         log.info("Cache HIT!");
-                        command.sender.tell(new ManagerBehavior.ResultCommand(generatedPrime));
+                        if (this.random.nextInt(5) < 2) {
+                            command.sender.tell(new ManagerBehavior.ResultCommand(generatedPrime));
+                        }
+
                     }
                     return Behaviors.same();
                 })

@@ -38,11 +38,14 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
         return newReceiveBuilder()
                 .onMessage(BlockMiningCommand.class, command -> {
                     final Block block = command.block;
-                    String hash = new String(new char[command.difficultyLevel]).replace("\0", "X");
-                    final String target = new String(new char[command.difficultyLevel]).replace("\0", "0");
+                    String hash = new String(new char[command.difficultyLevel])
+                            .replace("\0", "X");
+                    final String target = new String(new char[command.difficultyLevel])
+                            .replace("\0", "0");
 
                     int nonce = command.startNonce;
-                    while (!hash.substring(0, command.difficultyLevel).equals(target) && nonce < command.startNonce + 1000) {
+                    while (!hash.substring(0, command.difficultyLevel).equals(target)
+                            && nonce < command.startNonce + 1000) {
                         nonce++;
                         final String dataToEncode = block.getPreviousHash()
                                 + block.getTransaction().getTimestamp()
