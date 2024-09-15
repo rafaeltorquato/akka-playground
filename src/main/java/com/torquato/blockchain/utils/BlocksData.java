@@ -29,7 +29,6 @@ public class BlocksData {
         return new Block(transaction, lastHash);
     }
 
-
     public static int size() {
         return timeStamps.length;
     }
