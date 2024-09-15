@@ -21,14 +21,14 @@ public class BlockChainMiner {
     private ActorSystem<ManagerBehavior.Command> actorSystem;
 
     private void mineNextBlock() {
-        int nextBlockId = blocks.getSize();
-        if (nextBlockId < 10) {
-            String lastHash = nextBlockId > 0 ? blocks.getLastHash() : "0";
-            Block block = BlocksData.getNextBlock(nextBlockId, lastHash);
-            CompletionStage<HashResult> results = AskPattern.ask(actorSystem,
-                    me -> new ManagerBehavior.MineBlockCommand(block, me, difficultyLevel),
+        int nextBlockId = this.blocks.getSize();
+        if (nextBlockId < BlocksData.size()) {
+            final String lastHash = nextBlockId > 0 ? this.blocks.getLastHash() : "0";
+            final Block block = BlocksData.getNextBlock(nextBlockId, lastHash);
+            final CompletionStage<HashResult> results = AskPattern.ask(this.actorSystem,
+                    me -> new ManagerBehavior.MineBlockCommand(block, me, this.difficultyLevel),
                     Duration.ofSeconds(120),
-                    actorSystem.scheduler());
+                    this.actorSystem.scheduler());
 
             results.whenComplete((reply, failure) -> {
 
@@ -39,7 +39,7 @@ public class BlockChainMiner {
                     block.setNonce(reply.getNonce());
 
                     try {
-                        blocks.addBlock(block);
+                        this.blocks.addBlock(block);
                         log.info("Block added with hash : {}", block.getHash());
                         log.info("Block added with nonce: {}", block.getNonce());
                         mineNextBlock();
@@ -52,14 +52,14 @@ public class BlockChainMiner {
 
         } else {
             long end = System.currentTimeMillis();
-            actorSystem.terminate();
-            blocks.printAndValidate();
+            this.actorSystem.terminate();
+            this.blocks.printAndValidate();
             log.info("Time taken {} ms.", (end - start));
         }
     }
 
     public void mineBlocks() {
-        actorSystem = ActorSystem.create(ManagerBehavior.create(), "BlockChainMiner");
+        this.actorSystem = ActorSystem.create(ManagerBehavior.create(), "BlockChainMiner");
         mineNextBlock();
     }
 
