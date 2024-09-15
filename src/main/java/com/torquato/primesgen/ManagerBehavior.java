@@ -18,25 +18,6 @@ import java.util.TreeSet;
 public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
 
     public static final int MAX_PRIMES = 20;
-
-    public interface Command extends Serializable {
-    }
-
-    public record InstructionCommand(String instruction,
-                                     ActorRef<SortedSet<BigInteger>> instructor) implements Command {
-    }
-
-    public record ResultCommand(BigInteger number) implements Command {
-    }
-
-    public record NoResultCommand(ActorRef<WorkerBehavior.Command> worker) implements Command {
-    }
-
-    public static Behavior<Command> create() {
-        return Behaviors.setup(ManagerBehavior::new);
-    }
-
-
     private final SortedSet<BigInteger> sortedSet = new TreeSet<>();
     private ActorRef<SortedSet<BigInteger>> instructor;
 
@@ -44,6 +25,9 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
         super(context);
     }
 
+    public static Behavior<Command> create() {
+        return Behaviors.setup(ManagerBehavior::new);
+    }
 
     @Override
     public Receive<Command> createReceive() {
@@ -94,6 +78,18 @@ public class ManagerBehavior extends AbstractBehavior<ManagerBehavior.Command> {
                     return new NoResultCommand(worker);
 
                 });
+    }
+    public interface Command extends Serializable {
+    }
+
+    public record InstructionCommand(String instruction,
+                                     ActorRef<SortedSet<BigInteger>> instructor) implements Command {
+    }
+
+    public record ResultCommand(BigInteger number) implements Command {
+    }
+
+    public record NoResultCommand(ActorRef<WorkerBehavior.Command> worker) implements Command {
     }
 
 }

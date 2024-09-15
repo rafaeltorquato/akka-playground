@@ -1,5 +1,10 @@
 package com.torquato.blockchain.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Block {
 
     private final String previousHash;
@@ -12,28 +17,5 @@ public class Block {
         this.transaction = transaction;
     }
 
-    public void setNonce(int nonce) {
-        this.nonce = nonce;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public String getPreviousHash() {
-        return previousHash;
-    }
-
-    public Transaction getTransaction() {
-        return transaction;
-    }
-
-    public int getNonce() {
-        return nonce;
-    }
 
 }

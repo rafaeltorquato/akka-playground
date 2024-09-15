@@ -12,26 +12,16 @@ import com.torquato.blockchain.utils.BlockChainUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.util.Random;
 
 @Slf4j
 public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
 
-    public interface Command extends Serializable {
-    }
-
-    public record BlockMiningCommand(Block block,
-                                     int startNonce,
-                                     int difficultyLevel,
-                                     ActorRef<ManagerBehavior.Command> targetActor) implements Command {
+    private WorkerBehavior(ActorContext<Command> context) {
+        super(context);
     }
 
     public static Behavior<Command> create() {
         return Behaviors.setup(WorkerBehavior::new);
-    }
-
-    private WorkerBehavior(ActorContext<Command> context) {
-        super(context);
     }
 
     @Override
@@ -46,7 +36,7 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
 
                     int nonce = command.startNonce;
                     while (!hash.substring(0, command.difficultyLevel).equals(target)
-                            && nonce < command.startNonce + 1000) {
+                            && nonce < command.startNonce + command.nonceBlockSize) {
                         nonce++;
                         final String dataToEncode = block.getPreviousHash()
                                 + block.getTransaction().getTimestamp()
@@ -67,6 +57,16 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                     return Behaviors.stopped();
                 })
                 .build();
+    }
+
+    public interface Command extends Serializable {
+    }
+
+    public record BlockMiningCommand(Block block,
+                                     int startNonce,
+                                     int difficultyLevel,
+                                     int nonceBlockSize,
+                                     ActorRef<ManagerBehavior.Command> targetActor) implements Command {
     }
 
 }

@@ -15,18 +15,14 @@ import java.util.Random;
 @Slf4j
 public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
 
-    public record Command(String message,
-                          ActorRef<ManagerBehavior.Command> sender) implements Serializable {
+    private final Random random = new Random();
+
+    private WorkerBehavior(ActorContext<WorkerBehavior.Command> context) {
+        super(context);
     }
 
     public static Behavior<WorkerBehavior.Command> create() {
         return Behaviors.setup(WorkerBehavior::new);
-    }
-
-    private Random random = new Random();
-
-    private WorkerBehavior(ActorContext<WorkerBehavior.Command> context) {
-        super(context);
     }
 
     @Override
@@ -64,5 +60,9 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                     return Behaviors.same();
                 })
                 .build();
+    }
+
+    public record Command(String message,
+                          ActorRef<ManagerBehavior.Command> sender) implements Serializable {
     }
 }

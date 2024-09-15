@@ -36,6 +36,7 @@ class WorkerBehaviorTest {
                 block,
                 41071,
                 5,
+                1000,
                 this.inbox.getRef()
         );
 
@@ -51,6 +52,7 @@ class WorkerBehaviorTest {
                 block,
                 0,
                 5,
+                1000,
                 this.inbox.getRef()
         );
 

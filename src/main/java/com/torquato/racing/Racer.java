@@ -15,28 +15,18 @@ import java.util.Random;
 @Slf4j
 public class Racer extends AbstractBehavior<Racer.Command> {
 
-    public interface Command extends Serializable {
-    }
-
-    public record StartCommand(int raceLength) implements Command {
-    }
-
-    public record PositionCommand(ActorRef<RaceController.Command> controller) implements Command {
-    }
-
-    public static Behavior<Racer.Command> create() {
-        return Behaviors.setup(Racer::new);
-    }
-
-    //Instance
-
     private int averageSpeedAdjustmentFactor;
     private Random random;
-
     private double currentSpeed = 0;
 
     public Racer(ActorContext<Command> context) {
         super(context);
+    }
+
+    //Instance
+
+    public static Behavior<Racer.Command> create() {
+        return Behaviors.setup(Racer::new);
     }
 
     private double getMaxSpeed() {
@@ -123,6 +113,15 @@ public class Racer extends AbstractBehavior<Racer.Command> {
                     return Behaviors.same();
                 })
                 .build();
+    }
+
+    public interface Command extends Serializable {
+    }
+
+    public record StartCommand(int raceLength) implements Command {
+    }
+
+    public record PositionCommand(ActorRef<RaceController.Command> controller) implements Command {
     }
 
 

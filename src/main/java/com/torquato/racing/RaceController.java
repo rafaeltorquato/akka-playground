@@ -19,22 +19,13 @@ import java.util.Map;
 public class RaceController extends AbstractBehavior<RaceController.Command> {
 
     public static final String TIMER_KEY = "race-controller-timer";
+    private final int raceLength = 100;
+    private Map<ActorRef<Racer.Command>, Double> positions;
+    private Map<ActorRef<Racer.Command>, Long> finishingTimes;
+    private long start;
 
-    public interface Command extends Serializable {
-    }
-
-    public record StartCommand() implements Command {
-    }
-
-    public record RacerUpdateCommand(ActorRef<Racer.Command> racer,
-                                     double position) implements Command {
-    }
-
-    private record GetPostionsCommand() implements Command {
-    }
-
-    public record RacerFinishedCommand(ActorRef<Racer.Command> racer,
-                                       Long timestamp) implements Command {
+    private RaceController(ActorContext<Command> context) {
+        super(context);
     }
 
     public static Behavior<Command> create() {
@@ -42,15 +33,6 @@ public class RaceController extends AbstractBehavior<RaceController.Command> {
     }
 
     //Instance
-
-    private Map<ActorRef<Racer.Command>, Double> positions;
-    private Map<ActorRef<Racer.Command>, Long> finishingTimes;
-    private long start;
-    private final int raceLength = 100;
-
-    private RaceController(ActorContext<Command> context) {
-        super(context);
-    }
 
     @Override
     public Receive<Command> createReceive() {
@@ -133,6 +115,23 @@ public class RaceController extends AbstractBehavior<RaceController.Command> {
                     .replaceAll("akka://RaceController/user/racer-", "");
             System.out.printf("%d-%s: %sms\n", (i + 1), path, timestamp - this.start);
         }
+    }
+
+    public interface Command extends Serializable {
+    }
+
+    public record StartCommand() implements Command {
+    }
+
+    public record RacerUpdateCommand(ActorRef<Racer.Command> racer,
+                                     double position) implements Command {
+    }
+
+    private record GetPostionsCommand() implements Command {
+    }
+
+    public record RacerFinishedCommand(ActorRef<Racer.Command> racer,
+                                       Long timestamp) implements Command {
     }
 
 

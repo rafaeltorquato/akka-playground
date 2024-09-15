@@ -15,6 +15,7 @@ import java.util.concurrent.CompletionStage;
 @Slf4j
 public class BlockChainMiner {
 
+    private final int nonceBlockSize = 1500;
     private final int difficultyLevel = 5;
     private final BlockChain blocks = new BlockChain();
     private final long start = System.currentTimeMillis();
@@ -26,7 +27,7 @@ public class BlockChainMiner {
             final String lastHash = nextBlockId > 0 ? this.blocks.getLastHash() : "0";
             final Block block = BlocksData.getNextBlock(nextBlockId, lastHash);
             final CompletionStage<HashResult> results = AskPattern.ask(this.actorSystem,
-                    me -> new ManagerBehavior.MineBlockCommand(block, me, this.difficultyLevel),
+                    me -> new ManagerBehavior.MineBlockCommand(block, me, this.difficultyLevel, this.nonceBlockSize),
                     Duration.ofSeconds(120),
                     this.actorSystem.scheduler());
 
@@ -58,9 +59,26 @@ public class BlockChainMiner {
         }
     }
 
+    private void mineIndependentBlock() {
+        final Block block = BlocksData.getNextBlock(7, "33434");
+        final CompletionStage<HashResult> results = AskPattern.ask(this.actorSystem,
+                me -> new ManagerBehavior.MineBlockCommand(block, me, this.difficultyLevel, this.nonceBlockSize),
+                Duration.ofSeconds(120),
+                this.actorSystem.scheduler());
+        results.whenComplete((reply, failure) -> {
+            if (reply != null) {
+                log.info("Independent block mined with hash : {}", reply.getHash());
+            } else {
+                log.error("Independent block not mined");
+            }
+        });
+    }
+
     public void mineBlocks() {
-        this.actorSystem = ActorSystem.create(ManagerBehavior.create(), "BlockChainMiner");
+        this.actorSystem = ActorSystem.create(MiningSystemBehavior.create(), "MiningSystemBehavior");
+        mineIndependentBlock();
         mineNextBlock();
     }
+
 
 }
