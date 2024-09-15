@@ -12,6 +12,7 @@ import com.torquato.blockchain.utils.BlockChainUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.util.Random;
 
 @Slf4j
 public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
@@ -22,7 +23,7 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
     public record BlockMiningCommand(Block block,
                                      int startNonce,
                                      int difficultyLevel,
-                                     ActorRef<HashResult> targetActor) implements Command {
+                                     ActorRef<ManagerBehavior.Command> targetActor) implements Command {
     }
 
     public static Behavior<Command> create() {
@@ -56,9 +57,14 @@ public class WorkerBehavior extends AbstractBehavior<WorkerBehavior.Command> {
                     if (hash.substring(0, command.difficultyLevel).equals(target)) {
                         HashResult hashResult = new HashResult();
                         hashResult.foundAHash(hash, nonce);
-                        command.targetActor.tell(hashResult);
+
+                        command.targetActor.tell(new ManagerBehavior.HashResultCommand(hashResult));
+                        return Behaviors.same();
                     }
-                    return Behaviors.same();
+//                    if (new Random().nextInt(10) == 3) {
+//                        throw new ArithmeticException("No hash found!");
+//                    }
+                    return Behaviors.stopped();
                 })
                 .build();
     }

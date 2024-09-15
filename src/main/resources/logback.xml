@@ -7,7 +7,7 @@
         </layout>
     </appender>
 
-    <logger name="com.torquato" level="debug" additivity="false">
+    <logger name="com.torquato" level="info" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

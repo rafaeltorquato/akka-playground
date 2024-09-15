@@ -14,7 +14,7 @@ class WorkerBehaviorTest {
 
 
     BehaviorTestKit<WorkerBehavior.Command> testBehavior;
-    TestInbox<HashResult> inbox;
+    TestInbox<ManagerBehavior.Command> inbox;
 
     @BeforeEach
     void setUp() {
@@ -29,6 +29,8 @@ class WorkerBehaviorTest {
                 "00000d8f88bd56d44a8c1d96f43ca8cd4ab1993de47c519bd4c31ab3c2964f45",
                 41371
         );
+        final var expectedCommand = new ManagerBehavior.HashResultCommand(expectedHashResult);
+
         final Block block = BlocksData.getNextBlock(0, "0");
         final var command = new WorkerBehavior.BlockMiningCommand(
                 block,
@@ -39,7 +41,7 @@ class WorkerBehaviorTest {
 
         this.testBehavior.run(command);
 
-        this.inbox.expectMessage(expectedHashResult);
+        this.inbox.expectMessage(expectedCommand);
     }
 
     @Test
